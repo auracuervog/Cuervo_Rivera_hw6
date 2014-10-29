@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+double *accel(double *pos, double *v, double gamma);
 int main()
 {
   char filename[100]="velocidades.dat"
@@ -7,17 +8,25 @@ int main()
   float mint=0;
   float maxt=100;
   int npoints=((maxt-mint)/h);
+  float *x;
+  float *y;
+  float *z;
   float *Vx;
   float *Vy;
   float *Vz;
   float *t;
   float *Velocidades;
+  float *Posiciones;
   FILE *IN;
   Vx=malloc(sizeof(float)*N);
   Vy=malloc(sizeof(float)*N);
   Vz=malloc(sizeof(float)*N);
+  x=malloc(sizeof(float)*N);
+  y=malloc(sizeof(float)*N);
+  z=malloc(sizeof(float)*N);
   t=malloc(sizeof(float)*N);
   Velocidades=malloc(sizeof(float)*4);
+  Posiciones=malloc(sizeof(float)*3);
 
   in=fopen(filename,"w");
    if(!in)
@@ -37,46 +46,45 @@ int main()
   return 0;
 }
 
-float *RK4(float h,float told,float xold,float yold, float zold)
+float *RK4(float h,float*posiciones,float*velocidades)
 {
-  float t1;
-  float x1;
-  float y1;
-  float z1;
-  float t2;
-  float x2;
-  float y2;
-  float z2;
-  float t3;
-  float x3;
-  float y3;
-  float z3;
-  float k1x;
-  float k2x;
-  float k3x;
-  float k4x;
-  float k1y;
-  float k2y;
-  float k3y;
-  float k4y;
-  float k1z;
-  float k2z;
-  float k3z;
-  float k4z;
-  float kavx;
-  float kavy;
-  float kavz;
+  //vector de posiciones x,y,z...vector de velocidades t,vx,vy,vz
+  float*p1;
+  float*V1;
+  float*p2;
+  float*V2;
+  float*p3;
+  float*V3;
+  float*k1p;
+  float*k2p;
+  float*k3p;
+  float*k4p;
+  float*k1V;
+  float*k2V;
+  float*k3V;
+  float*k4V;
+  float*kavp;
+  float*kavV;
+
   float *posactual;
-  float *prima1=accel(told,xold,yold,zold);
-  
-  k1x=prima1[0];
-  k1y=prima1[1];
-  k1z=prima1[2];
+  float *velactual;
+
+  float *velprima1=accel(posiciones,velocidades);
+  float *posprima1=vel(velocidades);
+  k1x=posprima1[0];
+  k1y=posprima1[1];
+  k1z=posprima1[2];
+  k1vx=velprima1[0];
+  k1vy=velprima1[1];
+  k1vz=velprima1[2];
   // Primer Paso
-  t1=told+(h/2);
-  x1=xold+(h/2)*k1x;
-  y1=yold+(h/2)*k1y;
-  z1=zold+(h/2)*k1z;
+  t1=velocidades[0]+(h/2);
+  x1=posiciones[0]+(h/2)*k1x;
+  y1=posiciones[1]+(h/2)*k1y;
+  z1=posiciones[2]+(h/2)*k1z;
+  Vx1=velocidades[1]+(h/2)*k1vx;
+  Vy1=velocidades[2]+(h/2)*k1vy;
+  Vz1=velocidades[3]+(h/2)*k1vz;
   float *prima2=accel(t1,x1,y1,z1);
   k2x=prima2[0];
   k2y=prima2[1];
@@ -113,4 +121,49 @@ float *RK4(float h,float told,float xold,float yold, float zold)
 
   return posactual;  
   
+}
+double *accel(double *pos, double *v, double gamma)
+{
+  int i;
+  double *a;
+  double A,r,bo;
+  int n;
+
+  n = 2;
+  a=malloc(sizeof(double)*n); 
+  for(i=0;i<n;i++)
+    {
+      a[i]=0.0;
+    }
+
+  bo = pow(3*10,-5);
+  r = sqrt(pow(pos[0],2)+pow(pos[1],2)+pow(pos[2],2)); 
+  A = -(bo*pow(rt,3))/(pow(r,5)*masa*gamma);    
+
+  a[0] = (q*A*((2*pow(pos[2],2))-pow(pos[0],2)-pow(pos[1],2))*v[1])-(3*q*A*pos[1]*pos[2]*v[2]);
+  a[1] = -(q*A*((2*pow(pos[2],2))-pow(pos[0],2)-pow(pos[1],2))*v[0])+(3*q*A*pos[0]*pos[2]*v[2]);
+  a[2] = (3*q*A*pos[0]*pos[2]*v[0])-(3*q*A*pos[0]*pos[2]*v[1]);
+  
+  return a;
+}
+
+double *vel(double *v)
+{
+  int i;
+  double *dp;
+  int n;
+
+  n=3;
+  dp=malloc(sizeof(double)*n); 
+  for(i=0;i<n;i++)
+    {
+      dp[i]=0.0;
+    }
+
+  dp[0] = v[0];
+  dp[1] = v[1];
+  dp[2] = v[2];
+
+  return dp;
+
 }
