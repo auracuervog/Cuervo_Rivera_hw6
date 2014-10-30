@@ -1,13 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#define masa 1.69E-27
-#define q 1.6E-19
-#define rt 6378100
-float *RK4(float h,float*posiciones,float*Velocidades);
+#define masa 1.69E-27 //kg
+#define q 1.60217E-19 //C
+#define rt 6378100 //m
+#define pi 3.14159
+#define c 299792458 //m/s,
+
+float *RK4(float h,float gamma,float*posiciones,float*Velocidades);
 float *accel(float *pos, float *v, float gamma);
 float *vel(float *v);
-int main()
+
+int main(int argc, char **argv)
 {
   int i;
   char filename[100]="velocidades.dat";
@@ -24,6 +28,8 @@ int main()
   float *t;
   float *PosicionesVelocidades;
   FILE *IN;
+  float eko, alpha, gamma, vo;
+
   //Vectores Runge Kutta
   Vx=malloc(sizeof(float)*N);
   Vy=malloc(sizeof(float)*N);
@@ -40,24 +46,30 @@ int main()
       printf("problems opening the file %s\n", filename);
       exit(1);
     }
-  
 
    //Condiciones Iniciales posicion, Velocidad 
    float *VEL;
    float *POS;
    VEL=malloc(sizeof(float)*4);
    POS=malloc(sizeof(float)*3);
+
+   eko = atof(argv[1])*q; //J
+   alpha = atof(argv[2]);//°
+
+   vo = (eko+(masa*(pow(c,2))))/sqrt(masa*eko*(pow(c,2))*(eko+(2*(pow(c,2))))); 
+   gamma = 1/(sqrt(1-((pow(vo,2))/(pow(c,2))))); 
+
    VEL[0]=mint;
    VEL[1]=0;
-   VEL[2]=2;
-   VEL[3]=2;
+   VEL[2]=vo*sin(alpha*(pi/180));
+   VEL[3]=vo*cos(alpha*(pi/180));
    POS[0]=2*rt;
    POS[1]=0;
    POS[2]=0;
    
    for(i=1;i<N;i++)
      {
-       PosicionesVelocidades=RK4(h,POS,VEL);
+       PosicionesVelocidades=RK4(h,gamma,POS,VEL);
        
        x[i]=PosicionesVelocidades[0];
        y[i]=PosicionesVelocidades[1];
@@ -82,9 +94,8 @@ int main()
   return 0;
 }
 
-float *RK4(float h,float*posiciones,float*Velocidades)
+float *RK4(float h,float gamma,float*posiciones,float*Velocidades)
 {
-  float gamma=1;
   //vector de posiciones x,y,z...vector de velocidades t,vx,vy,vz
   float*p1;
   float*V1;
@@ -169,7 +180,6 @@ float *RK4(float h,float*posiciones,float*Velocidades)
   p2[0]=posiciones[0]+(h/2)*k2p[0];
   p2[1]=posiciones[1]+(h/2)*k2p[1];
   p2[2]=posiciones[2]+(h/2)*k2p[2];
-
 
   float *velprima3;
   velprima3=malloc(sizeof(float)*3);
