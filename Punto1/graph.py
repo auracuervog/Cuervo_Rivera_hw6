@@ -3,7 +3,7 @@ import numpy as np
 import sys
 
 x0 = sys.argv[1]
-filename = "presa%s.dat" %x0
+filename = "presa%s.txt" %x0
 datos = np.loadtxt(filename)
 t=datos[:,0]
 x=datos[:,1]

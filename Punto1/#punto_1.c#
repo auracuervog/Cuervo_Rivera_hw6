@@ -24,7 +24,7 @@ int main(int argc, char **argv)
   float y0=atof(argv[2]);
 
   char filename[100];
-  snprintf(filename, sizeof(char)*100,"presa%i.txt",(int) x0);
+  snprintf(filename, sizeof(char)*100,"presa%f.txt",x0);
  
   t[0]=tmin;
   x[0]=x0;
@@ -94,6 +94,4 @@ float *RK2(float told,float xold,float yold,float h)
   pos[2]=ynew;
   
   return pos;
-
-  
 }
