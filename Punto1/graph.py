@@ -11,12 +11,10 @@ y=datos[:,2]
 
 fig = plt.figure()
 ax = plt.axes()
-ax.set_xlabel("t")
-ax.set_ylabel("x")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
 ax.set_title("Presas")
-plt.plot(t,x,'r',label="Presas")
-ax.legend()
-plt.plot(t,y,'b',label="Cazadores")
+plt.plot(x,y,'b',label="Presas")
 ax.legend()
 
 filename = 'presas_x'
