@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#define masa 1
-#define q 1
-#define rt 1000
+#define masa 1.69E-27
+#define q 1.6E-19
+#define rt 6378100
+float *RK4(float h,float*posiciones,float*Velocidades);
 float *accel(float *pos, float *v, float gamma);
 float *vel(float *v);
 int main()
 {
+  int i;
   char filename[100]="velocidades.dat";
-  float h=0.01;
+  float h=0.1;
   float mint=0;
   float maxt=100;
   int N=((maxt-mint)/h);
@@ -20,9 +22,9 @@ int main()
   float *Vy;
   float *Vz;
   float *t;
-  float *Velocidades;
-  float *Posiciones;
+  float *PosicionesVelocidades;
   FILE *IN;
+  //Vectores Runge Kutta
   Vx=malloc(sizeof(float)*N);
   Vy=malloc(sizeof(float)*N);
   Vz=malloc(sizeof(float)*N);
@@ -30,25 +32,53 @@ int main()
   y=malloc(sizeof(float)*N);
   z=malloc(sizeof(float)*N);
   t=malloc(sizeof(float)*N);
-  Velocidades=malloc(sizeof(float)*4);
-  Posiciones=malloc(sizeof(float)*3);
-  /*
-  in=fopen(filename,"w");
-   if(!in)
+  PosicionesVelocidades=malloc(sizeof(float)*7);
+  
+  IN=fopen(filename,"w");
+   if(!IN)
     {
       printf("problems opening the file %s\n", filename);
       exit(1);
     }
-   for(i=1;i<npoints;i++)
+  
+
+   //Condiciones Iniciales posicion, Velocidad 
+   float *VEL;
+   float *POS;
+   VEL=malloc(sizeof(float)*4);
+   POS=malloc(sizeof(float)*3);
+   VEL[0]=mint;
+   VEL[1]=0;
+   VEL[2]=2;
+   VEL[3]=2;
+   POS[0]=2*rt;
+   POS[1]=0;
+   POS[2]=0;
+   
+   for(i=1;i<N;i++)
      {
-       Velocidades=RK4(t[i-1],x[i-1],y[i-1],z[i-1],h);
-       t[i]=Velocidades[0];
-       Vx[i]=Velocidades[1];
-       Vy[i]=Velocidades[2];
-       Vz[i]=Velocidades[3];
-       fprintf(in,"%f \t %f \t %f \t %f \t \n",t[i],Vx[i],Vy[i],Vz[i]);
+       PosicionesVelocidades=RK4(h,POS,VEL);
+       
+       x[i]=PosicionesVelocidades[0];
+       y[i]=PosicionesVelocidades[1];
+       z[i]=PosicionesVelocidades[2];
+       t[i]=PosicionesVelocidades[3];
+       Vx[i]=PosicionesVelocidades[4];
+       Vy[i]=PosicionesVelocidades[5];
+       Vz[i]=PosicionesVelocidades[6];
+
+       POS[0]=PosicionesVelocidades[0];
+       POS[1]=PosicionesVelocidades[1];
+       POS[2]=PosicionesVelocidades[2];
+       VEL[0]=PosicionesVelocidades[3];
+       VEL[1]=PosicionesVelocidades[4];
+       VEL[2]=PosicionesVelocidades[5];
+       VEL[3]=PosicionesVelocidades[6];
+           
+ 
+       fprintf(IN,"%f \t %f \t %f \t \n",x[i],y[i],z[i]);
      }
-  */
+   
   return 0;
 }
 
@@ -94,8 +124,10 @@ float *RK4(float h,float*posiciones,float*Velocidades)
   posactualvelactual=malloc(sizeof(float)*7);
   
   float *velprima1;
+  velprima1=malloc(sizeof(float)*3);
   velprima1=accel(posiciones,Velocidades,gamma);
   float *posprima1;
+  posprima1=malloc(sizeof(float)*3);
   posprima1=vel(Velocidades);
 
   k1p[0]=posprima1[0];
@@ -116,8 +148,10 @@ float *RK4(float h,float*posiciones,float*Velocidades)
 
 
   float *velprima2;
+  velprima2=malloc(sizeof(float)*3);
   velprima2=accel(p1,V1,gamma);
   float *posprima2;
+  posprima2=malloc(sizeof(float)*3);
   posprima2=vel(V1);
 
   k2p[0]=posprima2[0];
@@ -138,9 +172,11 @@ float *RK4(float h,float*posiciones,float*Velocidades)
 
 
   float *velprima3;
+  velprima3=malloc(sizeof(float)*3);
   velprima3=accel(p2,V2,gamma);
   float *posprima3;
-  velprima3=vel(V2);
+  posprima3=malloc(sizeof(float)*3);
+  posprima3=vel(V2);
 
   k3p[0]=posprima3[0];
   k3p[1]=posprima3[1];
@@ -160,8 +196,10 @@ float *RK4(float h,float*posiciones,float*Velocidades)
 
 
   float *velprima4;
+  velprima4=malloc(sizeof(float)*3);
   velprima4=accel(p3,V3,gamma);
   float *posprima4;
+  posprima4=malloc(sizeof(float)*3);
   posprima4=vel(V3);
 
   k4p[0]=posprima4[0];
@@ -208,7 +246,7 @@ float *accel(float *pos, float *v, float gamma)
       a[i]=0.0;
     }
 
-  bo = pow(3*10,-5);
+  bo = 3E-5;
   r = sqrt(pow(pos[0],2)+pow(pos[1],2)+pow(pos[2],2)); 
   A = -(bo*pow(rt,3))/(pow(r,5)*masa*gamma);    
 
