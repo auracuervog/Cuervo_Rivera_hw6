@@ -15,11 +15,11 @@ float accely(float xold, float yold, float zold, float x1old, float y1old, float
 float accelz(float xold, float yold, float zold, float x1old, float y1old, float z1old, float gamma, float r);
 float *RK2(float told,float xold,float yold,float zold,float Vxold,float Vyold,float Vzold,float h);
 
-int main()
+int main(int argc, char **argv)
 {
-  char filename[100]="vels.dat";
   int i;
-  float k=100000000*q;
+  float ek = atof(argv[1]);
+  float alpha_o = atof(argv[2]);
   float *Vx;
   float *Vy;
   float *Vz;
@@ -30,10 +30,11 @@ int main()
   float *espacioyvel;
   float tmin=0;
   float tmax=20;
+  float k=ek*q;
   float gamma=(k/(m*pow(c,2)))+1;
   float h=0.0001;
   FILE *in;
-  float alpha=30*pi/180;
+  float alpha=alpha_o*pi/180;
   long int N=(tmax-tmin)/h;
   espacioyvel=malloc(sizeof(float)*7);
   Vx=malloc(sizeof(float)*N);
@@ -44,6 +45,9 @@ int main()
   z=malloc(sizeof(float)*N);
   t=malloc(sizeof(float)*N);
  
+  char filename[100];
+  snprintf(filename, sizeof(char)*100,"trayectoria_%.1f_%.1f.dat",(float) ek, (float) alpha_o);
+
   float V0=c*sqrt(1-1/(pow(gamma,2)));
   t[0]=tmin;
   Vx[0]=0;
@@ -52,6 +56,7 @@ int main()
   x[0]=2*rt;
   y[0]=0;
   z[0]=0;
+
   in = fopen(filename,"w");
   if(!in)
     {
@@ -72,6 +77,7 @@ int main()
       fprintf(in,"%f \t %f \t %f \t \n",x[i],y[i],z[i]);
       //printf("%f \t %f \t %f \t %f \t \n",t[i],x[i],y[i],z[i]);
     }
+  return 0;
    
 }
 
