@@ -1,0 +1,2 @@
+Explicacion:
+El archivo de graficas py se corrio hasta 20, debido a que la trayectoria era la misma, y simplem,ente se sobrelapaba, y sin embargo, se demoraba en correr el .py muchisimo, para tmax=100. Sin embargo, para comprobar que funcionaba, se adjunto una grafica de gnuplot que muestra la evolucion hasta t=100
